@@ -33,6 +33,7 @@ const LetterContainer = ({
     if (!restartEnabled && gameState.gameStatus !== "") {
       setRestartEnabled(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState]);
 
   return (

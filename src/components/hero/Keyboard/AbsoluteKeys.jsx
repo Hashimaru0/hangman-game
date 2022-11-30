@@ -29,6 +29,7 @@ const AbsoluteKeys = ({ letter, targetStylesObj }) => {
     setCurrentStyles(newStylesArr);
 
     return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetStylesObj]);
 
   return (

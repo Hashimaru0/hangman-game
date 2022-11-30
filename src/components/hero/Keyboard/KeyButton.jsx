@@ -159,6 +159,7 @@ const KeyButton = ({
           return;
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [letterStateArr, letterContainerPosition]);
 
   return (

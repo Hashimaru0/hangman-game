@@ -1,70 +1,120 @@
-# Getting Started with Create React App
+# Hangman
+#### Game / SVG Animation
+A classic game of hangman.
+Guess the word in 6 tries before the hangman is completed to win the game.
+## How It Works
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+### Pick random hidden word
+A list of words is stored in words.json and one is picked randomly on game start and restart.
+```
+let randWord = WordData[Math.floor(Math.random() * WordData.length)].toUpperCase();
+```
+### Game state
+The `gameState` reducer holds data about the current state of the game:
+- Hidden word and which letter is revealed
+- Selected letter
+- Number of mistakes made
+- Which letters have been entered
+- If the game is ongoing, won or lost
+```
+const [gameState, dispatchGameState] = useReducer(gameStateReducer, {
+    word: [{ letter: "", revealed: false }],
+    selectedletter: "",
+    mistakes: 0,
+    enteredLetters: [{ letter: "", inWord: false }],
+    gameStatus: "", // '' | 'WON' | 'LOST'
+  });
+```
+The game state gets updated on every key press.
+```
+case "change_letter":
+      if (
+        gameState.gameStatus === "" &&
+        !gameState.enteredLetters.some(
+          (e) => e.letter === action.payload.newLetter
+        )
+      ) {
+        let letterStateArrCopy = action.payload.letterStateArr.slice(0);
+        for (let letterObj of letterStateArrCopy) {
+          if (
+            letterObj.letter === action.payload.newLetter &&
+            letterObj.state === "KEYBOARD"
+          ) {
+            letterObj.state = "CONTAINER";
+          } else if (
+            letterObj.letter !== action.payload.newLetter &&
+            letterObj.state === "CONTAINER"
+          ) {
+            letterObj.state = "KEYBOARD";
+          }
+        }
+        action.payload.setLetterStateArr(letterStateArrCopy);
+        return { ...gameState, selectedLetter: action.payload.newLetter };
+      }
+      return currentGameState;
+```
+### On letter enter
+```
+ case "enter_letter":
+      if (
+        gameState.gameStatus === "" &&
+        currentGameState.selectedLetter !== ""
+      ) {
+        if (
+          !currentGameState.enteredLetters.some(
+            (e) => e.letter === currentGameState.selectedLetter
+          ) ||
+          currentGameState.enteredLetters.length === 0
+        ) {
+          // Update letter state array
+          let letterStateArrCopy = action.payload.letterStateArr.slice(0);
+          let newState = "";
+          if (
+            currentGameState.word.some(
+              (e) => e.letter === currentGameState.selectedLetter
+            )
+          ) {
+            newState = "FOUND";
+          } else {
+            newState = "DISABLED";
+          }
+          for (let ltrObj of letterStateArrCopy) {
+            if (ltrObj.letter === currentGameState.selectedLetter) {
+              ltrObj.state = newState;
+            }
+          }
+          action.payload.setLetterStateArr(letterStateArrCopy);
 
-## Available Scripts
+          // Update game state
+          let madeMistake = true;
 
-In the project directory, you can run:
+          for (let letterObj of currentGameState.word) {
+            if (letterObj.letter === currentGameState.selectedLetter) {
+              letterObj.revealed = true;
+              madeMistake = false;
+            }
+          }
+          currentGameState.enteredLetters = [
+            ...currentGameState.enteredLetters,
+            { letter: currentGameState.selectedLetter, inWord: !madeMistake },
+          ];
+          if (madeMistake) currentGameState.mistakes += 1;
 
-### `npm start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+          // Check if game over
+          if (currentGameState.mistakes >= 6) {
+            currentGameState.gameStatus = "LOST";
+          }
+          if (
+            currentGameState.word.every(
+              (letterObj) => letterObj.revealed === true
+            )
+          ) {
+            currentGameState.gameStatus = "WON";
+          }
+          currentGameState.selectedLetter = "";
+        }
+        return currentGameState;
+      }
+      return currentGameState;
+```
+Check is performed to see if the game is over, if true, a restart button appears with a message based on number of mistakes made.

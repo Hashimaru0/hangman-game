@@ -53,6 +53,12 @@ case "change_letter":
       }
       return currentGameState;
 ```
+### Letter positions
+Letter container and each keyboard button position is stored and updated on window resize using Element.getBoundingClientRect(). These positions determine the position of absolute letters that will transition between them based upon which letter is selected or entered.
+```
+const [wordLettersPositions, setWordLettersPositions] = useState([null]);
+const [letterContainerPosition, setLetterContainerPosition] = useState(null);
+```
 ### On letter enter
 ```
  case "enter_letter":

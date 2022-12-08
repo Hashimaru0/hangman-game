@@ -1,7 +1,8 @@
 # Hangman
 #### Game / SVG Animation
 A classic game of hangman.
-Guess the word in 6 tries before the hangman is completed to win the game.
+Guess the word in 6 tries before the hangman is completed to win the game.  
+Live demo: https://hangman-game-hashimaru.netlify.app/
 ## How It Works
 
 ### Pick random hidden word
